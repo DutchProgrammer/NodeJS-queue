@@ -2,7 +2,7 @@ var queue = function queue() {
 
 	var jobs          = {};
 	var queueSettings = {
-		timeout: 300		
+		timeout: 30		
 	};
 	var triggers      = {
 		init: [],
@@ -27,8 +27,8 @@ var queue = function queue() {
 		var unique = name+'-'+(new Date()).getTime();
 
 		jobs[unique] = {
-			userFunction: userFunction,
-			timeout: timeout,
+			userFunction: (userFunction === undefined ? function() { } : userFunction),
+			timeout: (timeout === undefined ? 0 : timeout),
 			status: 'added'
 		}
 
@@ -38,10 +38,11 @@ var queue = function queue() {
 	};
 
 	var jobCallback = function jobCallback(job) {
+
 		if (job === undefined && runningJob) {
 			job = runningJob;
 		}
-		
+
 		if (jobs[job] === undefined) {
 			new Error('This job doenst exists');
 		}
@@ -102,6 +103,7 @@ var queue = function queue() {
 
 	this.run = function run() {
 		for (var job in jobs) {
+
 			if (jobs[job].status === 'added') {
 				runningJob = job;
 
