@@ -2,7 +2,7 @@ var queue = function queue() {
 
 	var jobs          = {};
 	var queueSettings = {
-		timeout: 30		
+		timeout: 30000		
 	};
 	var triggers      = {
 		init: [],
@@ -23,11 +23,12 @@ var queue = function queue() {
 		return this;
 	};
 
-	this.add = function add(name, userFunction, timeout) {
+	this.add = function add(name, userFunction, params, timeout) {
 		var unique = name+'-'+(new Date()).getTime();
 
 		jobs[unique] = {
 			userFunction: (userFunction === undefined ? function() { } : userFunction),
+			params: (params === undefined ? [] : params),
 			timeout: (timeout === undefined ? 0 : timeout),
 			status: 'added'
 		}
@@ -39,23 +40,33 @@ var queue = function queue() {
 
 	var jobCallback = function jobCallback(job) {
 
+		if (Object.keys(jobs).length === 0) {
+			new Error('No jobs');
+			return;
+		}
+
 		if (job === undefined && runningJob) {
 			job = runningJob;
 		}
 
 		if (jobs[job] === undefined) {
 			new Error('This job doenst exists');
-		}
-
-		//Stop timer
-		if (jobs[job]['timer'] !== undefined) {
-			clearTimeout(jobs[job]['timer']);
-			delete jobs[job]['timer'];
+			return;
 		}
 
 		jobs[job].status = 'completed';
 
-		emit('jobCallback', job);
+		//Stop timer
+		if (typeof jobs[job]['timer'] !== undefined) {
+			clearTimeout(jobs[job]['timer']);
+			delete jobs[job]['timer'];
+		}
+
+		emit('jobCallback', jobs[job]);
+
+		runningJob = false;
+
+		delete jobs[job];
 
 		//Start next cron
 		queueClass.run();
@@ -102,18 +113,30 @@ var queue = function queue() {
 	};
 
 	this.run = function run() {
+
+		if (runningJob) {
+			return false;
+		}
+
+		if (Object.keys(jobs).length === 0) {
+			return false;
+		}
+
 		for (var job in jobs) {
 
 			if (jobs[job].status === 'added') {
 				runningJob = job;
 
-				jobs[job].userFunction(jobCallback, job);
+				var jobParams = jobs[job].params;
+
+				jobParams.unshift(jobCallback, job);
 
 				if (jobs[job].timeout !== undefined && jobs[job].timeout > 0) {
 
 					jobs[job]['timer'] = setTimeout(function () {
 						jobs[job].status = 'timeout';
 						emit('timeout', job);
+						runningJob = false;
 						queueClass.run();
 					}, jobs[job].timeout);
 
@@ -123,10 +146,13 @@ var queue = function queue() {
 						jobs[job].status = 'timeout';
 						emit('timeout', job);
 						queueClass.run();
+						runningJob = false;
 					}, queueSettings.timeout);
 				}
 
+				jobs[job].userFunction.apply(this, jobParams);
 				emit('run', job);
+
 				break;
 			}
 		}
