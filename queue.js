@@ -7,7 +7,9 @@ var queue = function queue() {
 	var triggers      = {
 		init: [],
 		add: [],
-		jobCallback: []
+		jobCallback: [],
+		run: [],
+		timeout: []
 	};
 	var runningJob	 = false;
 	var queueClass   = this;
