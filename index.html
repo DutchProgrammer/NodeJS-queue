@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Nodejs-queue : NodeJS queue" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Nodejs-queue</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/DutchProgrammer/NodeJS-queue">View on GitHub</a>
+
+          <h1 id="project_title">Nodejs-queue</h1>
+          <h2 id="project_tagline">NodeJS queue</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/DutchProgrammer/NodeJS-queue/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/DutchProgrammer/NodeJS-queue/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="nodejs-queue-manager" class="anchor" href="#nodejs-queue-manager"><span class="octicon octicon-link"></span></a>NodeJS queue manager</h1>
+
+<p>With this NodeJS module you can stack functions so they will execute after each other.</p>
+
+<ul>
+<li>Stack functions</li>
+<li>Execute after each other</li>
+<li>Add your own params to the callBack</li>
+<li>Can use triggers on every step</li>
+</ul><h2>
+<a name="version" class="anchor" href="#version"><span class="octicon octicon-link"></span></a>Version</h2>
+
+<p>1.0</p>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<div class="highlight highlight-sh"><pre>mkdir modules
+git clone https://github.com/DutchProgrammer/NodeJS-queue ./modules/NodeJS-queue
+</pre></div>
+
+<h5>
+<a name="examples" class="anchor" href="#examples"><span class="octicon octicon-link"></span></a>Examples</h5>
+
+<div class="highlight highlight-sh"><pre>var <span class="nv">queue</span>       <span class="o">=</span> require<span class="o">(</span><span class="s1">'./queue'</span><span class="o">)</span><span class="p">;</span>
+var <span class="nv">fs</span>          <span class="o">=</span> require<span class="o">(</span><span class="s1">'fs'</span><span class="o">)</span><span class="p">;</span>
+var <span class="nv">download</span>    <span class="o">=</span> require<span class="o">(</span><span class="s1">'./download'</span><span class="o">)</span><span class="p">;</span>
+
+var <span class="nv">httpZipFile</span>      <span class="o">=</span> <span class="s1">'http://domain.com/all.csv'</span><span class="p">;</span>
+var <span class="nv">localZipFileName</span> <span class="o">=</span> <span class="s1">'all.csv'</span><span class="p">;</span>
+var <span class="nv">localZipFile</span>     <span class="o">=</span> <span class="s1">'./tmp/'</span>+localZipFileName<span class="p">;</span>
+
+//Available triggers
+
+//When settings has been <span class="nb">set</span>
+queue.on<span class="o">(</span><span class="s1">'init'</span>, <span class="k">function</span> <span class="o">(</span>settings<span class="o">)</span> <span class="o">{</span>
+    console.log<span class="o">(</span>settings<span class="o">)</span><span class="p">;</span>
+<span class="o">})</span><span class="p">;</span>
+
+//When an job has been added
+queue.on<span class="o">(</span><span class="s1">'add'</span>, <span class="k">function</span> <span class="o">(</span>jobDetails<span class="o">)</span> <span class="o">{</span>
+    console.log<span class="o">(</span>jobDetails<span class="o">)</span><span class="p">;</span>
+<span class="o">})</span><span class="p">;</span>
+
+//When an job has executed
+queue.on<span class="o">(</span><span class="s1">'jobCallback'</span>, <span class="k">function</span> <span class="o">(</span>jobDetails<span class="o">)</span> <span class="o">{</span>
+    console.log<span class="o">(</span>jobDetails<span class="o">)</span><span class="p">;</span>
+<span class="o">})</span><span class="p">;</span>
+
+//When the timeout has been triggers <span class="k">for</span> an job
+queue.on<span class="o">(</span><span class="s1">'timeout'</span>, <span class="k">function</span> <span class="o">(</span>jobDetails<span class="o">)</span> <span class="o">{</span>
+    console.log<span class="o">(</span>jobDetails<span class="o">)</span><span class="p">;</span>
+<span class="o">})</span><span class="p">;</span>
+
+//When job has started
+queue.on<span class="o">(</span><span class="s1">'run'</span>, <span class="k">function</span> <span class="o">(</span>jobDetails<span class="o">)</span> <span class="o">{</span>
+    console.log<span class="o">(</span>jobDetails<span class="o">)</span><span class="p">;</span>
+<span class="o">})</span><span class="p">;</span>
+
+fs.exists<span class="o">(</span>localZipFile, <span class="k">function</span> <span class="o">(</span>exists<span class="o">)</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span>!exists<span class="o">)</span> <span class="o">{</span>
+        queue.add<span class="o">(</span><span class="s1">'Downloading '</span>+localZipFile, download.downloadFile, <span class="o">[</span>httpZipFile, localZipFile<span class="o">])</span><span class="p">;</span>
+        queue.add<span class="o">(</span><span class="s1">'Parse '</span>+localZipFile, parseAllProducts, <span class="o">[</span>localZipFile<span class="o">])</span><span class="p">;</span>
+        queue.run<span class="o">()</span><span class="p">;</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="o">}</span>
+
+    fs.stat<span class="o">(</span>localZipFile, <span class="k">function</span><span class="o">(</span>err, stats<span class="o">)</span> <span class="o">{</span>
+
+        var <span class="nv">now</span> <span class="o">=</span> <span class="o">(</span>new Date<span class="o">())</span>.getTime<span class="o">()</span>/1000<span class="p">;</span>
+
+        <span class="k">if</span> <span class="o">(</span>now-<span class="o">(</span>new Date<span class="o">(</span>stats.mtime<span class="o">))</span>.getTime<span class="o">()</span>/1000 &gt; maxFileTime<span class="o">)</span> <span class="o">{</span>
+
+            queue.add<span class="o">(</span><span class="s1">'Downloading '</span>+localZipFile, download.downloadFile, <span class="o">[</span>httpZipFile, localZipFile<span class="o">])</span><span class="p">;</span>
+            queue.add<span class="o">(</span><span class="s1">'Parse '</span>+localZipFile, parseAllProducts, <span class="o">[</span>localZipFile<span class="o">])</span><span class="p">;</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+            queue.add<span class="o">(</span><span class="s1">'Parse '</span>+localZipFile, parseAllProducts, <span class="o">[</span>localZipFile<span class="o">])</span><span class="p">;</span>
+        <span class="o">}</span>
+
+        queue.run<span class="o">()</span><span class="p">;</span>
+    <span class="o">})</span><span class="p">;</span>
+<span class="o">})</span><span class="p">;</span>
+
+<span class="nv">parseAllProducts</span> <span class="o">=</span> <span class="k">function</span> <span class="o">(</span><span class="k">done</span>, jobName, csvFile<span class="o">)</span> <span class="o">{</span>
+    <span class="k">done</span><span class="o">()</span><span class="p">;</span>
+
+    fs.readFile<span class="o">(</span>csvFile, <span class="k">function</span> <span class="o">(</span>err, data<span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span>err<span class="o">)</span> <span class="o">{</span>
+            console.log<span class="o">(</span><span class="s1">'parseAllProducts errr: %s '</span>.error, err<span class="o">)</span><span class="p">;</span>
+            process.exit<span class="o">()</span><span class="p">;</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="o">}</span>
+
+        //do you thing
+    <span class="o">})</span><span class="p">;</span>
+<span class="o">}</span><span class="p">;</span>
+</pre></div>
+
+<h2>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
+
+<p>MIT</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Nodejs-queue maintained by <a href="https://github.com/DutchProgrammer">DutchProgrammer</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
