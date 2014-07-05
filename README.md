@@ -18,7 +18,7 @@ Installation
 
 ```sh
 mkdir modules
-git clone https://github.com/DutchProgrammer/NodeJS-queue ./modules/NodeJS-queue
+git clone https://github.com/DutchProgrammer/NodeJS-queue.git ./modules/NodeJS-queue
 ```
 
 ##### Examples
