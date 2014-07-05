@@ -13,6 +13,12 @@ Version
 
 1.0
 
+Requirements
+----
+No requirements this module is only using native NodeJS modules
+
+> For the demo i used [NodeJS download] (http://dutchprogrammer.github.io/NodeJS-download/)
+
 Installation
 --------------
 
