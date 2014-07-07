@@ -1,6 +1,6 @@
 var queue = function queue() {
 
-	var jobs          = {};
+	var jobs          = [];
 	var queueSettings = {
 		timeout: 30000		
 	};
@@ -26,23 +26,24 @@ var queue = function queue() {
 	};
 
 	this.add = function add(name, userFunction, params, timeout) {
-		var unique = name+'-'+(new Date()).getTime();
-
-		jobs[unique] = {
+		var newJob = {
+			name: name,
 			userFunction: (userFunction === undefined ? function() { } : userFunction),
 			params: (params === undefined ? [] : params),
 			timeout: (timeout === undefined ? 0 : timeout),
 			status: 'added'
-		}
+		};
 
-		emit('add', jobs[unique]);
+		jobs.push(newJob);
+
+		emit('add', newJob);
 
 		return this;
 	};
 
 	var jobCallback = function jobCallback(job) {
 
-		if (Object.keys(jobs).length === 0) {
+		if (jobs.length === 0) {
 			new Error('No jobs');
 			return;
 		}
@@ -120,13 +121,15 @@ var queue = function queue() {
 			return false;
 		}
 
-		if (Object.keys(jobs).length === 0) {
+		if (jobs.length === 0) {
+			console.log(jobs, 'no jobs');
 			return false;
 		}
 
 		for (var job in jobs) {
 
 			if (jobs[job].status === 'added') {
+
 				runningJob = job;
 
 				var jobParams = jobs[job].params;
@@ -135,25 +138,25 @@ var queue = function queue() {
 
 				if (jobs[job].timeout !== undefined && jobs[job].timeout > 0) {
 
-					jobs[job]['timer'] = setTimeout(function () {
+					jobs[job]['timer'] = setTimeout(function timerCallBack() {
 						jobs[job].status = 'timeout';
-						emit('timeout', job);
+						emit('timeout', jobs[job]);
 						runningJob = false;
 						queueClass.run();
 					}, jobs[job].timeout);
 
 				} else if (queueSettings.timeout !== undefined && queueSettings.timeout > 0) {
 
-					jobs[job]['timer'] = setTimeout(function () {
+					jobs[job]['timer'] = setTimeout(function timerCallBack() {
 						jobs[job].status = 'timeout';
-						emit('timeout', job);
+						emit('timeout', jobs[job]);
 						queueClass.run();
 						runningJob = false;
 					}, queueSettings.timeout);
 				}
 
+				emit('run', jobs[job]);
 				jobs[job].userFunction.apply(this, jobParams);
-				emit('run', job);
 
 				break;
 			}
