@@ -44,7 +44,7 @@ var queue = function queue() {
 	var jobCallback = function jobCallback(job) {
 
 		if (jobs.length === 0) {
-			new Error('No jobs');
+			throw new Error('No jobs');
 			return;
 		}
 
@@ -53,7 +53,7 @@ var queue = function queue() {
 		}
 
 		if (jobs[job] === undefined) {
-			new Error('This job doenst exists');
+			throw new Error('This job doenst exists');
 			return;
 		}
 
@@ -77,7 +77,7 @@ var queue = function queue() {
 
 	var emit = function emit(event, params) {
 		if (triggers[event] === undefined ) {
-			new Error('No valid event');
+			throw new Error('No valid event');
 			return false;
 		}
 
@@ -96,11 +96,11 @@ var queue = function queue() {
 
 	this.on = function on(event, userFunction) {
 		if (triggers[event] === undefined ) {
-			new Error('No valid event');
+			throw new Error('No valid event');
 		}
 
 		if (userFunction === undefined || typeof userFunction !== 'function' ) {
-			new Error('Callback function has to be an function');
+			throw new Error('Callback function has to be an function');
 		}
 
 		if (event.indexOf(' ') !== -1) {
