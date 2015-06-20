@@ -1,5 +1,5 @@
 {
-  "name": "NodeJS-queue",
+  "name": "nodejs-queue",
   "version": "1.0.5",
   "description": "NodeJS queue functions",
   "main": "queue.js",
