@@ -100,7 +100,10 @@ parseAllProducts = function (done, jobName, csvFile) {
 			return;
 		}
 		
-		//do you thing
+		//do your thing
+		
+		//Let the queue system knows this job is done
+		done();
 	});
 };
 ```
