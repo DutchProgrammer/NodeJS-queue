@@ -11,7 +11,7 @@ With this NodeJS module you can stack functions so they will execute after each 
 Version
 ----
 
-1.0.0
+1.0.6
 
 Requirements
 ----
